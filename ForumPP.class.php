@@ -18,13 +18,7 @@ require_once 'models/ForumPPEntry.php';
 require_once 'models/ForumPPHelpers.php';
 require_once 'models/ForumPPVisit.php';
 
-if (version_compare($GLOBALS['SOFTWARE_VERSION'], '2.2', '>')) { 
-    require_once 'app/models/smiley.php';
-} else {
-    require_once('models/Interactable.class.php');
-    require_once('models/LinkButton.class.php');
-    require_once('models/Button.class.php');
-}
+require_once 'app/models/smiley.php';
 
 
 // Notifications
@@ -53,14 +47,8 @@ class ForumPP extends StudipPlugin implements StandardPlugin
         PageLayout::addScript($this->getPluginURL() . '/javascript/jquery.joyride.js');
         PageLayout::addStylesheet($this->getPluginURL() . '/stylesheets/joyride.css');
         
-        if (version_compare($GLOBALS['SOFTWARE_VERSION'], '2.2', '<=')) { 
-            PageLayout::addStylesheet($this->getPluginURL() . '/stylesheets/buttons.css');
-        }
-
-        if (!version_compare($GLOBALS['SOFTWARE_VERSION'], '2.3', '>')) {
-            $navigation = $this->getTabNavigation(Request::get('cid', $GLOBALS['SessSemName'][1]));
-            Navigation::insertItem('/course/forum2', $navigation['forum2'], 'members'); 
-        }        
+        $navigation = $this->getTabNavigation(Request::get('cid', $GLOBALS['SessSemName'][1]));
+        Navigation::insertItem('/course/forum2', $navigation['forum2'], 'members'); 
     }
 
     /**
@@ -92,7 +80,7 @@ class ForumPP extends StudipPlugin implements StandardPlugin
     }
 
     /* interface method */
-    function getIconNavigation($course_id, $last_visit, $user_id)
+    function getIconNavigation($course_id, $last_visit)
     {
         if (!$this->isActivated($course_id)) {
             return;
@@ -101,9 +89,6 @@ class ForumPP extends StudipPlugin implements StandardPlugin
         $num_entries = ForumPPVisit::getCount($course_id, ForumPPVisit::getVisit($course_id));
         
         $navigation = new Navigation('forumpp', PluginEngine::getLink('forumpp/index/enter_seminar'));
-        if (version_compare($GLOBALS['SOFTWARE_VERSION'], '2.3', '>')) {
-            $navigation->setBadgeNumber($num_entries);
-        }
 
         $text = ForumPPHelpers::getVisitText($num_entries, $course_id);
 
@@ -116,13 +101,6 @@ class ForumPP extends StudipPlugin implements StandardPlugin
         return $navigation;
     }
 
-    /* interface method */
-    function getNotificationObjects($course_id, $since, $user_id)
-    {
-        return array();
-    }
-
- 
     /* notification */
     function overviewDidClear($notification, $user_id)
     {
